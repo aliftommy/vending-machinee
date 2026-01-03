@@ -1,693 +1,264 @@
-<?php 
-session_start();
-if(!isset($_SESSION['login'])){
-    header('Location: login.php');
-    exit;
-}
-    // koneksi ke database
-    $konek = mysqli_connect("localhost", "root", "", "dbwaterlevel");
-
-    $host = "localhost";
-    $user = "root";
-    $pass = "";
-    $db   = "dbwaterlevel"; // Ganti dengan nama database kamu
-
-    // Buat koneksi
-    $conn = mysqli_connect($host, $user, $pass, $db);
-
-    // Cek koneksi
-    if (!$conn) {
-        die("Koneksi ke database gagal: " . mysqli_connect_error());
-    }
-    echo "Koneksi ke database berhasil!";
-
-    // baca isi tabel tangki
-    $sql = mysqli_query($konek, "SELECT * FROM tb_tangki");
-    $data= mysqli_fetch_array($sql);
-
-    $tinggi_max_tangki = 300; //tinggi tangki dalam cm
-    $jari2 = 1; //jari2 tangki dalam meter
-    $phi = 3.14; //volume = phi * r^2 * tinggi (tinggi air)
-    //ukur tinggi air
-    $tinggi_air = $tinggi_max_tangki - $data['tinggi'];
-    // prosentase ketinggian air
-    $prosentase_tinggi_air = ($tinggi_air/$tinggi_max_tangki)*100; //hasil persen
-    // hitung volume air
-    $volume = $phi * ($jari2 * $jari2) * ($tinggi_air/100); // satuan m3
-    $liter = $volume * 1000 ; // satuan liter
-
-    //bubuk kopi 1
-    $bubuk1 = mysqli_query($konek, "SELECT * FROM tb_bubuk1");
-    $databubuk1 = mysqli_fetch_array($bubuk1);
-    $berat_sekarang1 = $databubuk1['bubuk1']; 
-    $kapasitas_maximum = 2000;//2000g
-    $persentase_bubuk1 = round(($berat_sekarang1 / $kapasitas_maximum) * 100);
-
-    //bubuk kopi 2
-    $bubuk2 = mysqli_query($konek, "SELECT * FROM tb_bubuk2");
-    $databubuk2 = mysqli_fetch_array($bubuk2);
-    $berat_sekarang2 = $databubuk2['bubuk2']; 
-    $persentase_bubuk2 = round(($berat_sekarang2 / $kapasitas_maximum) * 100);
-
-    //bubuk kopi 3
-    $bubuk3 = mysqli_query($konek, "SELECT * FROM tb_bubuk3");
-    $databubuk3 = mysqli_fetch_array($bubuk3);
-    $berat_sekarang3 = $databubuk3['bubuk3']; 
-    $persentase_bubuk3 = round(($berat_sekarang3 / $kapasitas_maximum) * 100);
-
-    //suhu
-    $suhu = mysqli_query($konek, "SELECT * FROM tb_suhu");
-    $datasuhu = mysqli_fetch_array($suhu);
-    $suhu_air = $datasuhu['suhu'];
-
-    //gelas tersedia
-    $gelas = mysqli_query($konek, "SELECT * FROM tb_gelas");
-    $datagelas = mysqli_fetch_array($gelas);
-    $stok_gelas = $datagelas['stok_gelas'];
-
- ?>
-
- <script>
-    function refreshStok() {
-    fetch("refresh.php")
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById("availableGlasses").innerHTML = data;
-        })
-        .catch(error => console.log("Error:", error));
-}
-
-setInterval(refreshStok, 1000); // refresh tiap 3 detik
-refreshStok(); // panggil pertama kali
-//     function refreshData() {
-//     const ids = ["availableGlasses"];
-
-//     ids.forEach(id => {
-//         fetch("refresh.php?stok_gelass=" + id)
-//             .then(res => res.text())
-//             .then(text => {
-//                 document.getElementById(id).innerHTML = text;
-//             });
-//     });
-// }
-
-// // refresh setiap 3 detik
-// setInterval(refreshData, 1000);
-// // panggil pertama kali
-// refreshData();
-
-    // setTimeout(function() {
-    //     location.reload();
-    // }, 3000); // 3000ms = 3 detik
-
-    function konfirmasiKirim() {
-          if (!confirm("Yakin ingin melakukan reset data?")) {
-        return; // klik TIDAK → berhenti
-    }
-
-    const formData = new FormData(document.getElementById("formKirim"));
-
-    fetch("simpan.php", {
-        method: "POST",
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-        alert("Reset berhasil");
-        console.log(data);
-    })
-    .catch(error => {
-        alert("Reset gagal");
-        console.error(error);
-    });
-}
-    // let yakin = confirm("Apakah Anda yakin ingin mengirim data 50?");
-    // if (yakin) {
-    //     document.getElementById("formKirim").submit();
-    // } else {
-    //     alert("Pengiriman dibatalkan.");
-    // }
-
-</script>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitor Mesin Kopi</title>
+
+    <!-- Bootstrap & Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- CSS custom -->
+    <link rel="stylesheet" href="style.css">
     <style>
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        }
+body {
+    font-family: 'Roboto', sans-serif;
+    background: #EEE5D3;
+    padding: 20px;
+    font-weight: bold;
+}
 
-        body {
-            font-family: 'Roboto', sans-serif;
-/*            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);*/
-            min-height: 100vh;
-            padding: 20px;
-            font-weight: bold;
-            background: #EEE5D3;
-        }
+.container {
+    max-width: 100%;
+    background: #F5F1DC;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
 
-        .container {
-           overflow: auto;
-            max-width: 100%;
-            margin: 0 auto;
-            background: #F5F1DC;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
+.header h1 {
+    font-size: 2.9rem;
+    color: black;
+}
 
-        .header {
-            margin-bottom: 30px;
-        }
+.header h5 {
+    color: #7f8c8d;
+}
 
-        .header h1 {
-            font-size: 2.9rem;
-            color: black;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
+.dashboard {
+    display: grid;
+    gap: 25px;
+}
 
-        .header h5 {
-            color: #7f8c8d;
-            font-size: 1.4rem;
-        }
+.top-section {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 25px;
+}
 
-        .dashboard {
-            display: grid;
-            gap: 25px;
-            margin-bottom: 1px;
-        }
+.level-container {
+    border: 2px solid #144fc6;
+    border-radius: 0 0 40px 40px;
+    height: 300px;
+    position: relative;
+}
 
-        .top-section {
-            display: grid;
-            grid-template-columns: 1fr 3fr;
-            gap: 25px;
-        }
+.water-level {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 88%;
+    border-radius: 0 0 40px 40px;
+    overflow: hidden;
+}
 
-        .level-container {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            border: 2px solid #144fc6;
-            border-radius: 0 0 40px 40px;
-            position: sticky;
-            height: 300px;
-            /*top: 100px;*/
-            /*padding-bottom: 297px;*/
-           
-        }
-        .level-container h3,
-        .level-container i {
-            margin-top: -1px;
-            margin-right: 5px;
-            margin-left: 3px;
-            font-size: 1.7rem;
-        }
+.water-level2 {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(to top, #3498db, #85c1e9);
+    border-radius: 15px 15px 0 0;
+}
 
-        .water-level {
-            border-radius: 0 0 40px 40px;
-            /*max-height: 100%;*/
-            /*top: 12%;*/
-            width: 100%;
-            /*background: black;*/
-            height: 100%;
-            max-height: 88%;
-            transform: translate(-50%);
-            left: 50%;
-            bottom: 0px;
-            /*background: linear-gradient(to top, #3498db 0%, #85c1e9 100%);*/
-/*            border: 3px solid #2980b9;*/
-/*            border-radius: 10px;*/
-            /*margin: 0 auto;*/
-            position: absolute;
-            overflow: hidden;
-           
-        }
-        .water-level2{
-            position: absolute;
-            background: linear-gradient(to top, #3498db 0%, #85c1e9 100%);
-            height: <?php echo $prosentase_tinggi_air; ?>%; ;
-            width:100%;
-            transform: rotate(180deg);
-            bottom: 0px;
-            overflow: auto;
-            border-radius: 15px 15px 0 0 ;
-             animation: wave 2s ease-in-out infinite;
-            animation: slideInLeft 3s ease-out;
-            justify-content: center;
-            display: flex;
-        }
+.bubuk-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
 
-        .water-level2::before {
-            overflow: hidden;
-            border-radius: 15px 15px 0 0 ;
-            content: '';
-            position: absolute;
-            top: 5%;
-            left: 0;
-            right: 0;
-            bottom: 0px;
-            background: linear-gradient(to top, #2980b9 0%, #5dade2 100%);
-            animation: wave 2s ease-in-out infinite;
-        }
+.bubuk-container {
+    border: 2px solid #5a3905;
+    border-radius: 15px;
+    padding: 20px;
+    height: 300px;
+    position: relative;
+}
 
-        @keyframes wave {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
+.bubuk-level {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 88%;
+}
 
-        .bubuk-section {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
+.bubuk-level2 {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(45deg,#5e2b06,#8b4716,#a06125,#6d3209);
+    border-radius: 15px 15px 0 0;
+}
 
-        .bubuk-container {
-            /*background: linear-gradient(145deg, #fff3e0, #ffe0b2);*/
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            border: 2px solid #5a3905;
-            /*transition: transform 0.3s ease, box-shadow 0.3s ease;*/
-            position: sticky;
-            height: 300px;
-        }
+.bottom-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
 
-        /*.bubuk-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-        }*/
+.temperature-circle {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    box-shadow: 0 0 300px rgba(255,27,27,0.62);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
 
-        .bubuk-container h4,i {    
-            margin-right: -16px;
-            margin-top: -17px;
-            margin-left: -16px;
-            color: #663300;
-            font-size: 1.7rem;
-        }
+.temp-text {
+    font-size: 1.7rem;
+    color: #c2185b;
+}
 
-        .bubuk-level {
-            border-radius: 0 0 15px 15px;
-            max-height: 88%;
-            width: 100%;
-            height: 100%;
-            bottom: 0px;
-            /*background: linear-gradient(to top, #753D05 0%, #753D05 100%);*/
-            /*background: linear-gradient(45deg, #5e2b06, #8b4716, #a06125, #6d3209);*/
-            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
-            /*border: 2px solid #a0522d;*/
-            /*border-radius: 8px;*/
-            left: 50%;
-            /*margin: 0 auto;
-            bottom: 0px;
-*/          position: absolute;
-            transform: translate(-50%);
-        }
-        .bubuk-level2{
-            position: absolute;
-            background: linear-gradient(45deg, #5e2b06, #8b4716, #a06125, #6d3209);
-            width:100%;
-            transform: rotate(180deg);
-            bottom: 0px;
-            overflow: auto;
-            border-radius: 15px 15px 0 0 ;
-            justify-content: center;
-            display: flex;
-        }
-        #bubuk1{
-            height: <?php echo $persentase_bubuk1 ?>%; ;
-        }
-        #bubuk2{
-            height: <?php echo $persentase_bubuk2 ?>%; ;
-        }
-        #bubuk3{
-            height: <?php echo $persentase_bubuk3 ?>%; ;
-        }
+.stat-box {
+    background: linear-gradient(145deg,#e8f5e8,#c8e6c9);
+    padding: 30px;
+    border-radius: 12px;
+    border: 2px solid #4caf50;
+}
 
-        .bubuk-level2::before {
-            content: '';
-            position: absolute;
-            top: 30%;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            /*background: linear-gradient(to top, #5C3106 0%, #5C3106 100%);*/
-            
-        }
+.percentage {
+    position: absolute;
+    top: 10px;
+    left: 43%;
+    font-size: 30px;
+}
 
-        .bottom-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
+.penutup {
+    position: absolute;
+    top: 35px;
+    width: 100%;
+    height: 2px;
+    background: blue;
+}
 
-        .temperature-container {
-            /*background: linear-gradient(145deg, #fce4ec, #f8bbd9);*/
-            border-radius: 15px;
-            padding: -2px;
-            text-align: center;
-            /*box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);*/
-            border: 2px;
-        }
+.penutupkopi {
+    position: absolute;
+    top: 35px;
+    width: 100%;
+    height: 2px;
+    background: #5a3905;
+}
 
-        .temperature-circle h3 {
-            position: absolute;
-            color: black;
-            margin-bottom: 150px;
-            font-size: 1.7rem;
-        }
+@media (max-width: 600px) {
+    .top-section,
+    .bottom-section {
+        grid-template-columns: 1fr;
+    }
 
-        .temperature-circle {
-            width: 250px;
-            height: 250px;
-            border-radius: 50%;
-            /*background: conic-gradient(#ff6b6b 0deg, #ff8e8e 120deg, #ffb3b3 240deg, #ff6b6b 360deg);*/
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            box-shadow: 0 0 300px rgba(255, 27, 27, 0.62);
-            position: relative;
-            /*animation: rotate 10s linear infinite;*/
-        }
+    .bubuk-section {
+        grid-template-columns: 1fr;
+    }
+}
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .temperature-circle::before {
-            content: '';
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            background: white;
-            border-radius: 50%;
-        }
-
-        .temp-text {
-            position: relative;
-            z-index: 1;
-            font-size: 1.7rem;
-            font-weight: bold;
-            color: #c2185b;
-        }
-
-        .stats-container {
-            /*display: flex;
-            flex-direction: column;
-            gap: 15px;*/
-        }
-
-        .stat-box {
-            background: linear-gradient(145deg, #e8f5e8, #c8e6c9);
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            border: 2px solid #4caf50;
-            transition: all 0.3s ease;
-        }
-
-        .stat-box:hover {
-            transform: translateX(5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-box h4 {
-            color: black;
-            margin-bottom: 10px;
-            font-size: 1.7rem;
-        }
-
-        .stat-value {
-            font-size: 1.7rem;
-            font-weight: bold;
-            color: black;
-            margin-left: 45px;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #4caf50;
-            animation: pulse 2s infinite;
-        }
-        .penutup{
-            position: absolute;
-            right: 0px;
-            top: 35px;
-            height: 2px;
-            width: 100%; 
-            background-color: blue;
-            z-index: 3;
-            }
-        /*.penutup p{
-            margin-left: 135px;
-        }*/
-        .penutupkopi{
-            position: absolute;
-            right: 0.5px;
-            top: 35px;
-            height: 2px;
-            width: 100%; 
-            background-color: #5a3905;
-            z-index: 3;
-        }
-        .stats-container form{
-            position: sticky;
-            margin-right: 10px;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .percentage {
-            font-size: 30px;
-            position: absolute;
-            top: 10px;
-            left: 43%;
-            /*margin-top: 5px;*/
-            /*margin: 25px auto 0 auto;*/
-
-
-            /*bottom: 20px;*/
-
-            /*text-align: center;*/
-            /*max-height: 70px;   */
-            /*overflow: auto;*/
-            /*transform: rotate(180deg);*/
-            /*left: 33%;*/
-            
-        }
-        button{
-            all: unset;
-        }
-        button:hover{
-            transform: scale(1.25);
-        }
-
-        @media (max-width: 600px) {
-             /*.level-container{
-                width: 70%;
-             }*/
-            .top-section, .bottom-section {
-                grid-template-columns: 1fr;
-                max-width: 92%;
-                gap: 0.1px;
-            }
-            
-            .bubuk-section {
-                grid-template-columns: 1fr;
-            }
-            .temperature-circle{
-                 max-width:95%;
-            }
-             .stats-container{
-                 max-width:93%;
-             }
-             .temperature-circle {
-                margin: 15px;
-             }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .container {
-                padding: 20px;
-            }
-            .level-container{
-                margin-bottom: 40px;
-            }
-        }
-        }
     </style>
-
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <!-- ☕  -->
-            <h1>Monitor Mesin Kopi</h1>
-            <h5>Dashboard Manajemen Inventaris</p>
-        </div>
 
-        <div class="dashboard">
-            <div class="top-section">
-                <div class="level-container ">
+<div class="container">
+    <div class="header">
+        <h1>Monitor Mesin Kopi</h1>
+        <h5>Dashboard Manajemen Inventaris</h5>
+    </div>
+
+    <div class="dashboard">
+        <div class="top-section">
+
+            <!-- LEVEL AIR -->
+            <div class="level-container">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3>Level Air</h3>
+                    <i class="fas fa-tint text-primary"></i>
+                </div>
+                <div class="penutup"></div>
+
+                <div class="water-level">
+                    <div class="water-level2" style="height:70%"></div>
+                    <div class="percentage">70%</div>
+                </div>
+            </div>
+
+            <!-- BUBUK -->
+            <div class="bubuk-section">
+
+                <div class="bubuk-container">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h3>Level Air</h3>
-                        <i class="fas fa-tint text-primary"></i>
+                        <h4>Gula Aren</h4>
+                        <i class="fas fa-coffee text-warning"></i>
                     </div>
-                    <div class="penutup"></div>
-                    <div class="water-level">
-                        <div class="water-level2"></div>
-                        <div class="percentage"><?php echo round ($prosentase_tinggi_air); ?>%</div>
+                    <div class="penutupkopi"></div>
+                    <div class="bubuk-level">
+                        <div class="bubuk-level2" style="height:60%"></div>
+                        <div class="percentage">60%</div>
                     </div>
                 </div>
 
-                <div class="bubuk-section">
-                    <div class="bubuk-container">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h4>Gula Aren</h4>
-                            <i class="fas fa-coffee text-warning"></i>
-                        </div>
-                        <div class="penutupkopi"></div>
-                        <div class="bubuk-level">
-                            <div class="bubuk-level2" id="bubuk1"></div>
-                            <div class="percentage"><?php echo round ($persentase_bubuk1); ?>%</div>
-                        </div>
-                    </div>
-                    <div class="bubuk-container">
-                         <div class="d-flex justify-content-between align-items-center">
+                <div class="bubuk-container">
+                    <div class="d-flex justify-content-between align-items-center">
                         <h4>Cappuccino</h4>
                         <i class="fas fa-coffee text-warning"></i>
                     </div>
                     <div class="penutupkopi"></div>
-                        <div class="bubuk-level" >
-                        <div class="bubuk-level2" id="bubuk2"></div>
-                        <div class="percentage" id="bubuk2Percentage"><?php echo round ($persentase_bubuk2); ?>%</div>
-                        </div>
+                    <div class="bubuk-level">
+                        <div class="bubuk-level2" style="height:80%"></div>
+                        <div class="percentage">80%</div>
                     </div>
-                    <div class="bubuk-container">
-                         <div class="d-flex justify-content-between align-items-center">
+                </div>
+
+                <div class="bubuk-container">
+                    <div class="d-flex justify-content-between align-items-center">
                         <h4>Latte</h4>
                         <i class="fas fa-coffee text-warning"></i>
                     </div>
                     <div class="penutupkopi"></div>
-                        <div class="bubuk-level" >
-                        <div class="bubuk-level2" id="bubuk3"></div>
-                        <div class="percentage" id="bubuk3Percentage"><?php echo round ($persentase_bubuk3); ?>%</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bottom-section">
-                <div class="temperature-container">
-                    
-                    <div class="temperature-circle">
-                        <h3>Suhu Air <i class="fas fa-thermometer-half text-danger ms-2"></i></h3>
-                        <div class="temp-text" id="temperature"><?php echo $suhu_air; ?>°C</div>
+                    <div class="bubuk-level">
+                        <div class="bubuk-level2" style="height:50%"></div>
+                        <div class="percentage">50%</div>
                     </div>
                 </div>
 
-                <div class="stats-container">
-                    <div class="stat-box">
-                        <form id="formKirim" action="simpan.php" method="POST">
-                            <button type="button" onclick="konfirmasiKirim()"><i class="fa-solid fa-arrows-rotate"style="color: #2caa84;"></i></button>
-                            <input type="hidden" name="kirim50" value="1">
-                        </form>
-                        <h4> <i class="fas fa-mug-hot text-success mx-2"></i>Gelas Tersedia</h4>
-                        <div class="stat-value" id="availableGlasses"><?php echo $stok_gelas; ?></div>
-                    </div>
-                   <!--  <div class="stat-box">
-                        <h4> <i class="fas fa-money-bill-wave text-success mx-2"></i>Total Pendapatan</h4>
-                        <div class="stat-value" id="totalRevenue">Rp 450.000</div>
-                    </div>
-                    <div class="stat-box">
-                        <h4><i class="fas fa-chart-line text-info mx-2"></i> Total Penjualan</h4>
-                        <div class="stat-value" id="totalSales">12 kopi</div>
-                    </div> -->
-                </div>
             </div>
         </div>
+
+        <!-- BAGIAN BAWAH -->
+        <div class="bottom-section">
+
+            <div class="temperature-container">
+                <div class="temperature-circle">
+                    <h3>Suhu Air <i class="fas fa-thermometer-half text-danger"></i></h3>
+                    <div class="temp-text">85°C</div>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-box">
+                    <h4><i class="fas fa-mug-hot text-success mx-2"></i>Gelas Tersedia</h4>
+                    <div class="stat-value">25</div>
+                </div>
+            </div>
+
+        </div>
     </div>
+</div>
 
-    <!-- <script>
-        // Simulasi data real-time
-        function updateData() {
-            // Update level air
-            const waterLevel = Math.floor(Math.random() * 30) + 60; // 60-90%
-            document.getElementById('waterPercentage').textContent = waterLevel + '%';
-            
-            // Update bubuk kopi
-            const bubuk1Level = Math.floor(Math.random() * 40) + 50; // 50-90%
-            const bubuk2Level = Math.floor(Math.random() * 30) + 70; // 70-100%
-            const bubuk3Level = Math.floor(Math.random() * 50) + 30; // 30-80%
-            
-            document.getElementById('bubuk1Percentage').textContent = bubuk1Level + '%';
-            document.getElementById('bubuk2Percentage').textContent = bubuk2Level + '%';
-            document.getElementById('bubuk3Percentage').textContent = bubuk3Level + '%';
-            
-            // Update suhu
-            const temperature = Math.floor(Math.random() * 15) + 80; // 80-95°C
-            document.getElementById('temperature').textContent = temperature + '°C';
-            
-            // Update gelas tersedia
-            const glasses = Math.floor(Math.random() * 10) + 20; // 20-30
-            document.getElementById('availableGlasses').textContent = glasses;
-            
-            // Update total penjualan (bertambah secara acak)
-            const currentSales = parseInt(document.getElementById('totalSales').textContent);
-            if (Math.random() > 0.7) { // 30% chance untuk bertambah
-                const newSales = currentSales + 1;
-                document.getElementById('totalSales').textContent = newSales + ' gelas';
-                
-                // Update pendapatan (asumsi Rp 4000 per gelas)
-                const revenue = newSales * 4000;
-                document.getElementById('totalRevenue').textContent = 'Rp ' + revenue.toLocaleString('id-ID');
-            }
-        }
-
-        // Update data setiap 3 detik
-        setInterval(updateData, 3000);
-
-        // Animasi loading awal
-        window.addEventListener('load', function() {
-            document.querySelector('.container').style.opacity = '0';
-            document.querySelector('.container').style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                document.querySelector('.container').style.transition = 'all 0.8s ease';
-                document.querySelector('.container').style.opacity = '1';
-                document.querySelector('.container').style.transform = 'translateY(0)';
-            }, 100);
-        });
-
-        // Efek hover pada kartu
-        document.querySelectorAll('.stat-box, .bubuk-container').forEach(box => {
-            box.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.02)';
-            });
-            
-            box.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-            });
-        });
-    </script> -->
 </body>
 </html>
+
