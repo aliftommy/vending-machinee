@@ -1,16 +1,13 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor Mesin Kopi</title>
+    <title>Vending Machine</title>
 
-    <!-- Bootstrap & Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- CSS DIPISAH -->
+    <link rel="stylesheet" href="css/style.css">
 
-    <!-- CSS custom -->
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <style>
         * {
     margin: 0;
@@ -26,147 +23,86 @@ body {
 }
 
 .container {
-    max-width: 100%;
-    background: #F5F1DC;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    max-width: 400px;
+    margin: auto;
 }
 
-.header h1 {
-    font-size: 2.9rem;
-    color: black;
-}
-
-.header h5 {
-    color: #7f8c8d;
+.header {
+    background: #2C3E50;
+    color: white;
+    padding: 15px;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 15px;
 }
 
 .dashboard {
-    display: grid;
-    gap: 25px;
+    background: #C5B79F;
+    padding: 15px;
+    border-radius: 15px;
 }
 
 .top-section {
-    display: grid;
-    grid-template-columns: 1fr 3fr;
-    gap: 25px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
 }
 
 .level-container {
-    border: 2px solid #144fc6;
-    border-radius: 0 0 40px 40px;
-    height: 300px;
     position: relative;
+    width: 150px;
+    height: 220px;
+    background: #F4EBD0;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.percentage {
+    position: absolute;
+    top: 10px;
+    width: 100%;
+    text-align: center;
+    font-size: 28px;
+    z-index: 2;
+}
+
+.penutup {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 40px;
+    background: #F4EBD0;
+    z-index: 1;
 }
 
 .water-level {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 88%;
-    border-radius: 0 0 40px 40px;
-    overflow: hidden;
+    height: 100%;
+    background: #dcdcdc;
 }
 
 .water-level2 {
     position: absolute;
     bottom: 0;
     width: 100%;
-    background: linear-gradient(to top, #3498db, #85c1e9);
-    border-radius: 15px 15px 0 0;
-}
-
-.bubuk-section {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-.bubuk-container {
-    border: 2px solid #5a3905;
-    border-radius: 15px;
-    padding: 20px;
-    height: 300px;
-    position: relative;
-}
-
-.bubuk-level {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 88%;
-}
-
-.bubuk-level2 {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background: linear-gradient(45deg,#5e2b06,#8b4716,#a06125,#6d3209);
-    border-radius: 15px 15px 0 0;
+    height: 70%;
+    background: #3498db;
 }
 
 .bottom-section {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
-}
-
-.temperature-circle {
-    width: 250px;
-    height: 250px;
-    border-radius: 50%;
-    box-shadow: 0 0 300px rgba(255,27,27,0.62);
     display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
+    justify-content: space-between;
 }
 
-.temp-text {
-    font-size: 1.7rem;
-    color: #c2185b;
-}
-
-.stat-box {
-    background: linear-gradient(145deg,#e8f5e8,#c8e6c9);
-    padding: 30px;
-    border-radius: 12px;
-    border: 2px solid #4caf50;
-}
-
-.percentage {
-    position: absolute;
-    top: 10px;
-    left: 43%;
-    font-size: 30px;
-}
-
-.penutup {
-    position: absolute;
-    top: 35px;
-    width: 100%;
-    height: 2px;
-    background: blue;
-}
-
-.penutupkopi {
-    position: absolute;
-    top: 35px;
-    width: 100%;
-    height: 2px;
-    background: #5a3905;
-}
-
-@media (max-width: 600px) {
-    .top-section,
-    .bottom-section {
-        grid-template-columns: 1fr;
-    }
-
-    .bubuk-section {
-        grid-template-columns: 1fr;
-    }
+.box {
+    width: 30%;
+    background: #2C3E50;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
 }
 
     </style>
@@ -175,90 +111,30 @@ body {
 
 <div class="container">
     <div class="header">
-        <h1>Monitor Mesin Kopi</h1>
-        <h5>Dashboard Manajemen Inventaris</h5>
+        <h1>Vending Machine</h1>
+        <h5>Monitoring System</h5>
     </div>
 
     <div class="dashboard">
+
         <div class="top-section">
-
-            <!-- LEVEL AIR -->
             <div class="level-container">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3>Level Air</h3>
-                    <i class="fas fa-tint text-primary"></i>
-                </div>
+                <div class="percentage">88%</div>
                 <div class="penutup"></div>
-
                 <div class="water-level">
-                    <div class="water-level2" style="height:70%"></div>
-                    <div class="percentage">70%</div>
+                    <div class="water-level2"></div>
                 </div>
-            </div>
-
-            <!-- BUBUK -->
-            <div class="bubuk-section">
-
-                <div class="bubuk-container">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4>Gula Aren</h4>
-                        <i class="fas fa-coffee text-warning"></i>
-                    </div>
-                    <div class="penutupkopi"></div>
-                    <div class="bubuk-level">
-                        <div class="bubuk-level2" style="height:60%"></div>
-                        <div class="percentage">60%</div>
-                    </div>
-                </div>
-
-                <div class="bubuk-container">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4>Cappuccino</h4>
-                        <i class="fas fa-coffee text-warning"></i>
-                    </div>
-                    <div class="penutupkopi"></div>
-                    <div class="bubuk-level">
-                        <div class="bubuk-level2" style="height:80%"></div>
-                        <div class="percentage">80%</div>
-                    </div>
-                </div>
-
-                <div class="bubuk-container">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4>Latte</h4>
-                        <i class="fas fa-coffee text-warning"></i>
-                    </div>
-                    <div class="penutupkopi"></div>
-                    <div class="bubuk-level">
-                        <div class="bubuk-level2" style="height:50%"></div>
-                        <div class="percentage">50%</div>
-                    </div>
-                </div>
-
             </div>
         </div>
 
-        <!-- BAGIAN BAWAH -->
         <div class="bottom-section">
-
-            <div class="temperature-container">
-                <div class="temperature-circle">
-                    <h3>Suhu Air <i class="fas fa-thermometer-half text-danger"></i></h3>
-                    <div class="temp-text">85°C</div>
-                </div>
-            </div>
-
-            <div class="stats-container">
-                <div class="stat-box">
-                    <h4><i class="fas fa-mug-hot text-success mx-2"></i>Gelas Tersedia</h4>
-                    <div class="stat-value">25</div>
-                </div>
-            </div>
-
+            <div class="box">Temperature<br>30°C</div>
+            <div class="box">Cup<br>120</div>
+            <div class="box">Status<br>READY</div>
         </div>
+
     </div>
 </div>
 
 </body>
 </html>
-
