@@ -1,278 +1,641 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monitor Mesin Kopi</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=320, initial-scale=1.0">
+    <title>Monitor Mesin Kopi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        }
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+        body {
+            font-family: 'Roboto', sans-serif;
+/*            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);*/
+            min-height: 100vh;
+            padding: 20px;
+            font-weight: bold;
+            background: #EEE5D3;
+            /*#EEE5D3*/
+        }
+
+        .container {
+            max-width:100%;
+            background:#F5F1DC;
+            border-radius:20px;
+            padding:30px;
+            box-shadow:0 20px 40px rgba(0,0,0,.1);
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size:clamp(1.6rem,4vw,2.9rem);
+            color: black;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h5 {
+            color: #7f8c8d;
+            font-size:clamp(1rem,2.5vw,1.4rem);
+        }
+
+        .dashboard {
+            display: grid;
+            gap: 25px;
+            /*margin-bottom: 1px;*/
+        }
+
+        .top-section {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 25px;
+        }
+
+        .level-container {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid #144fc6;
+            border-radius: 0 0 40px 40px;
+            position: relative;
+            height: 300px;
+            /*top: 100px;*/
+            /*padding-bottom: 297px;*/
+           
+        }
+        .level-container h3,
+        .level-container i {
+            font-size:clamp(1.3rem,3vw,1.7rem);
+           /* margin-top: -1px;
+            margin-right: 5px;
+            margin-left: 3px;*/
+            /*font-size: 1.3rem;*/
+        }
+
+        .water-level {
+            border-radius: 0 0 40px 40px;
+            /*max-height: 100%;*/
+            /*top: 12%;*/
+            width: 100%;
+            /*background: black;*/
+            height: 100%;
+            max-height: 88%;
+            transform: translate(-50%);
+            left: 50%;
+            bottom: 0px;
+            /*background: linear-gradient(to top, #3498db 0%, #85c1e9 100%);*/
+/*            border: 3px solid #2980b9;*/
+/*            border-radius: 10px;*/
+            /*margin: 0 auto;*/
+            position: absolute;
+            overflow: hidden;
+           
+        }
+        .water-level2{
+            position: absolute;
+            background: linear-gradient(to top, #3498db 0%, #85c1e9 100%);
+            height: 0%; 
+            /*<?php echo $air; ?>%*/
+            width:100%;
+            transform: rotate(180deg);
+            bottom: 0px;
+            overflow: auto;
+            border-radius: 15px 15px 0 0 ;
+             animation: wave 2s ease-in-out infinite;
+            animation: slideInLeft 3s ease-out;
+            justify-content: center;
+            display: flex;
+        }
+
+        .water-level2::before {
+            overflow: hidden;
+            border-radius: 15px 15px 0 0 ;
+            content: '';
+            position: absolute;
+            top: 5%;
+            left: 0;
+            right: 0;
+            bottom: 0px;
+            background: linear-gradient(to top, #2980b9 0%, #5dade2 100%);
+            animation: wave 2s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .bubuk-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .bubuk-container {
+            /*background: linear-gradient(145deg, #fff3e0, #ffe0b2);*/
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border: 2px solid #5a3905;
+            /*transition: transform 0.3s ease, box-shadow 0.3s ease;*/
+            position: sticky;
+            height: 300px;
+        }
+
+        /*.bubuk-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }*/
+
+        .bubuk-container h4,i {    
+            margin-right: -16px;
+            margin-top: -17px;
+            margin-left: -16px;
+            color: #663300;
+             font-size:clamp(1.3rem,3vw,1.7rem);
+        }
+
+        .bubuk-level {
+            border-radius: 0 0 15px 15px;
+            max-height: 88%;
+            width: 100%;
+            height: 100%;
+            bottom: 0px;
+            /*background: linear-gradient(to top, #753D05 0%, #753D05 100%);*/
+            /*background: linear-gradient(45deg, #5e2b06, #8b4716, #a06125, #6d3209);*/
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            /*border: 2px solid #a0522d;*/
+            /*border-radius: 8px;*/
+            left: 50%;
+            /*margin: 0 auto;
+            bottom: 0px;
+*/          position: absolute;
+            transform: translate(-50%);
+        }
+        .bubuk-level2{
+            position: absolute;
+            background: linear-gradient(45deg, #5e2b06, #8b4716, #a06125, #6d3209);
+            height: 100%;
+            max-height: 100%;
+            width:100%;
+            transform: rotate(180deg);
+            bottom: 0px;
+            overflow: hidden;
+            border-radius: 15px 15px 0 0 ;
+            justify-content: center;
+            display: flex;
+        }
+        #bubuk1{
+            height: 100%;
+        }
+        #bubuk2{
+            height: 100%;
+        }
+        #bubuk3{
+            height: 100%;
+        }
+
+        .bubuk-level2::before {
+            content: '';
+            position: absolute;
+            top: 30%;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /*background: linear-gradient(to top, #5C3106 0%, #5C3106 100%);*/
+            
+        }
+
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .temperature-container {
+            /*background: linear-gradient(145deg, #fce4ec, #f8bbd9);*/
+            border-radius: 15px;
+            padding: -2px;
+            text-align: center;
+            /*box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);*/
+            border: 2px;
+        }
+
+        .temperature-circle h3 {
+            position: absolute;
+            color: black;
+            margin-bottom: 150px;
+            font-size:clamp(1.3rem,3vw,1.7rem);
+        }
+
+        .temperature-circle {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            /*background: conic-gradient(#ff6b6b 0deg, #ff8e8e 120deg, #ffb3b3 240deg, #ff6b6b 360deg);*/
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            box-shadow: 0 0 300px rgba(255, 27, 27, 0.62);
+            position: relative;
+            /*animation: rotate 10s linear infinite;*/
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .temperature-circle::before {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .temp-text {
+            position: relative;
+            z-index: 1;
+            font-size:clamp(1.3rem,4vw,1.8rem);
+            font-weight: bold;
+            color: #c2185b;
+        }
+
+        .stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .stat-box {
+            position: relative;
+            background: linear-gradient(145deg, #e8f5e8, #c8e6c9);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border: 2px solid #4caf50;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-box h4 {
+            color: black;
+            margin-bottom: 10px;
+             font-size:clamp(1.3rem,3vw,1.7rem);
+        }
+
+        .stat-value {
+            font-size:clamp(1.3rem,4vw,1.8rem);
+            font-weight: bold;
+            color: black;
+            margin-left: 45px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        .penutup{
+            position: absolute;
+            right: 0px;
+            top: 35px;
+            height: 2px;
+            width: 100%; 
+            background-color: blue;
+            z-index: 3;
+            }
+        /*.penutup p{
+            margin-left: 135px;
+        }*/
+        .penutupkopi{
+            position: absolute;
+            right: 0.5px;
+            top: 35px;
+            height: 2px;
+            width: 100%; 
+            background-color: #5a3905;
+            z-index: 3;
+        }
+        .stats-container form{
+            /*osition: sticky;
+            margin-right: 10px;*/
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .percentage {
+            font-size:clamp(1.3rem,4vw,1.8rem);
+            position: absolute;
+            top: 10px;
+            left: 43%;
+            /*margin-top: 5px;*/
+            /*margin: 25px auto 0 auto;*/
+
+
+            /*bottom: 20px;*/
+
+            /*text-align: center;*/
+            /*max-height: 70px;   */
+            /*overflow: auto;*/
+            /*transform: rotate(180deg);*/
+            /*left: 33%;*/
+            
+        }
+        .header-air {
+            display: flex;              /* sejajarkan */
+            align-items: center;        /* tengah vertikal */
+            gap: 20px;                  /* jarak antar elemen */
+
+        }
+        .header-air i{
+            position: relative;
+            top: 5px;
+        }
+        .formair{
+            margin-top: 4px;
+            margin-left: auto;
+            margin-right: 19px;
+       
+        }
+        .formGelas{
+            position:absolute;
+            top:20px;
+            right:20px;
+            background: red;
+           
+            
+           
+        }
+        button{
+           background: none;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover{
+            transform: scale(1.25);
+        }
+        @media (max-width: 600px) {
+             /*.level-container{
+                width: 70%;
+             }*/
+            .top-section, .bottom-section {
+                grid-template-columns: 1fr;
+                max-width: 100%;
+                gap: 15px;
+            }
+            
+            .bubuk-section {
+                grid-template-columns: 1fr;
+            }
+             .container{
+                padding:15px;
+            }
+           /* .temperature-circle{
+                 max-width:100%;
+            }
+             .stats-container{
+                 max-width:100%;
+                 margin-top: 20px;
+             }
+             .temperature-circle {
+                margin: 55px;
+             }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            .level-container{
+                margin-bottom: 40px;
+            }*/
+        }
+       /* ===== MODAL ===== */
+.modal-overlay {
+   position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: .3s;
+  z-index: 999999; /* 🔥 PENTING */
 }
 
-body{
-    font-family:'Roboto',sans-serif;
-    background:#EEE5D3;
-    padding:20px;
-    font-weight:bold;
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-/* ===== CONTAINER ===== */
-.container{
-    max-width:100%;
-    background:#F5F1DC;
-    border-radius:20px;
-    padding:30px;
-    box-shadow:0 20px 40px rgba(0,0,0,.1);
+.popup-box {
+  background: #fff;
+  width: 320px;
+  padding: 22px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,.2);
+  transform: scale(.8);
+  transition: .3s;
 }
 
-/* ===== HEADER ===== */
-.header h1{
-    font-size:clamp(1.8rem,4vw,2.9rem);
-}
-.header h5{
-    font-size:clamp(1rem,2.5vw,1.4rem);
-    color:#7f8c8d;
+.modal-overlay.active .modal {
+  transform: scale(1);
 }
 
-/* ===== LAYOUT ===== */
-.dashboard{
-    display:grid;
-    gap:25px;
-}
-.top-section{
-    display:grid;
-    grid-template-columns:1fr 3fr;
-    gap:25px;
+.modal h3 {
+  margin-bottom: 8px;
 }
 
-/* ===== LEVEL AIR ===== */
-.level-container{
-    border:2px solid #144fc6;
-    border-radius:0 0 40px 40px;
-    height:300px;
-    position:relative;
-}
-.level-container h3{
-    font-size:clamp(1.3rem,3vw,1.7rem);
-}
-
-.water-level{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    height:88%;
-    overflow:hidden;
-}
-.water-level2{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    height:0%;
-    background:linear-gradient(to top,#3498db,#85c1e9);
-    border-radius:15px 15px 0 0;
-}
-
-/* ===== PERCENTAGE (RESPONSIVE) ===== */
-.percentage{
-    position:absolute;
-    top:10px;
-    left:50%;
-    transform:translateX(-50%);
-    font-size:clamp(1.2rem,4vw,1.9rem);
-}
-
-/* ===== BUBUK ===== */
-.bubuk-section{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:20px;
-}
-.bubuk-container{
-    border:2px solid #5a3905;
-    border-radius:15px;
-    padding:20px;
-    height:300px;
-    position:relative;
-}
-.bubuk-container h4{
-    font-size:clamp(1.2rem,3vw,1.7rem);
-}
-
-.bubuk-level{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    height:88%;
-}
-.bubuk-level2{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    background:linear-gradient(45deg,#5e2b06,#8b4716,#a06125,#6d3209);
-    border-radius:15px 15px 0 0;
-}
-
-/* ===== BOTTOM ===== */
-.bottom-section{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:25px;
-}
-
-/* ===== TEMPERATURE ===== */
-.temperature-circle{
-    width:250px;
-    height:250px;
-    border-radius:50%;
-    margin:0 auto;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    position:relative;
-    box-shadow:0 0 300px rgba(255,27,27,.62);
-}
-.temperature-circle h3{
-    font-size:clamp(1.2rem,3vw,1.7rem);
-}
-.temp-text{
-    font-size:clamp(1.3rem,4vw,1.8rem);
-    color:#c2185b;
-}
-
-/* ===== STAT ===== */
-.stat-box{
-    background:linear-gradient(145deg,#e8f5e8,#c8e6c9);
-    padding:30px;
-    border-radius:12px;
-    border:2px solid #4caf50;
-}
-.stat-box h4{
-    font-size:clamp(1.2rem,3vw,1.7rem);
-}
-.stat-value{
-    font-size:clamp(1.3rem,4vw,1.8rem);
-    margin-left:45px;
+.modal p {
+  font-size: 14px;
+  color: #555;
 }
 
 /* ===== BUTTON ===== */
-.formAir button{
-    float:none;
-    margin:0;
-}
-.formGelas button{
-    position:absolute;
-    top:10px;
-    right:10px;
-}
-button{
-    background:none;
-    border:none;
-    cursor:pointer;
-}
-button:hover{
-    transform:scale(1.25);
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
 }
 
-/* ===== MOBILE ===== */
-@media(max-width:600px){
-    .top-section,.bottom-section{
-        grid-template-columns:1fr;
-    }
-    .bubuk-section{
-        grid-template-columns:1fr;
-    }
-    .container{
-        padding:20px;
-    }
+.btnn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
 }
-</style>
+
+.batal{
+    background: indianred;
+    color: white;
+}
+
+.ya {
+  background: #2caa84 ;
+  color: white;
+}
+
+.btnn:hover {
+  opacity: .85;
+}
+
+/* ===== NOTIF ===== */
+.notif {
+  position: fixed;
+  top: 20px;
+  right: -300px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  transition: .4s;
+  z-index: 1000;
+}
+
+.notif.show {
+  right: 20px;
+}
+
+.notif.success { background: #2caa84; }
+.notif.error { background: #e74c3c; }
+
+    </style>
+
 </head>
-
 <body>
-
-<div class="container">
-
-    <div class="header">
-        <h1>Monitor Mesin Kopi</h1>
-        <h5>Dashboard Manajemen Inventaris</h5>
-    </div>
-
-    <div class="dashboard">
-
-        <div class="top-section">
-
-            <div class="level-container">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3>Level Air</h3>
-                    <form class="formAir">
-                        <button type="button">
-                            <i class="fa-solid fa-arrows-rotate" style="color:#2caa84;"></i>
-                        </button>
-                    </form>
-                    <i class="fas fa-tint text-primary"></i>
-                </div>
-
-                <div class="water-level">
-                    <div class="water-level2"></div>
-                    <div class="percentage">88%</div>
-                </div>
+        <div class="modal-overlay" id="popupAir">
+          <div class="popup-box">
+            <h3>Konfirmasi Reset</h3>
+            <p>Yakin ingin mengisi ulang air ke 100%?</p>
+            <div class="modal-actions">
+              <button class="btnn batal" onclick="batalKirimAir()">Batal</button>
+              <button class="btnn ya" onclick="kirimAir()">Ya, Reset</button>
             </div>
+          </div>
+        </div>
+    <div class="container">
 
-            <div class="bubuk-section">
-                <div class="bubuk-container">
-                    <h4>Gula Aren</h4>
-                    <div class="bubuk-level">
-                        <div class="bubuk-level2"></div>
-                        <div class="percentage">70%</div>
-                    </div>
-                </div>
-
-                <div class="bubuk-container">
-                    <h4>Cappuccino</h4>
-                    <div class="bubuk-level">
-                        <div class="bubuk-level2"></div>
-                        <div class="percentage">60%</div>
-                    </div>
-                </div>
-
-                <div class="bubuk-container">
-                    <h4>Latte</h4>
-                    <div class="bubuk-level">
-                        <div class="bubuk-level2"></div>
-                        <div class="percentage">90%</div>
-                    </div>
-                </div>
-            </div>
-
+        <div class="header">
+            <!-- ☕  -->
+            <h1>Monitor Mesin Kopi</h1>
+            <h5>Dashboard Manajemen Inventaris</p>
         </div>
 
-        <div class="bottom-section">
+        <div class="dashboard">
+            <div class="top-section">
+                <div class="level-container ">
+                    <div class="header-air">
+                        <h3>Level Air </h3>
+                        <i class="fas fa-tint text-primary"></i>
+                        <form id="formKirimAir" action="" method="POST" class="formair">
+                            <button type="button" onclick="konfirmasiKirimAir()" class="btn btn-link p-1"><i class="fa-solid fa-arrows-rotate text-success"style="color: #2caa84;"></i></button>
+                            <input type="hidden" name="kirim100" value="1">
+                        </form>
+                        
+                    </div>
+                    <div class="penutup"></div>
+                    <div class="water-level">
+                        <div class="water-level2"></div>
+                        <div class="percentage" id="dataair">100%</div>
+                    </div>
+                </div>
 
-            <div class="temperature-circle">
-                <h3>Suhu Air</h3>
-                <div class="temp-text">75°C</div>
+                <div class="bubuk-section">
+                    <div class="bubuk-container">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4>Gula Aren</h4>
+                            <i class="fas fa-coffee text-warning"></i>
+                        </div>
+                        <div class="penutupkopi"></div>
+                        <div class="bubuk-level">
+                            <div class="bubuk-level2" id="bubuk1"></div>
+                            <div class="percentage" id="bubuk1Percentage">100%</div>
+                        </div>
+                    </div>
+                    <div class="bubuk-container">
+                         <div class="d-flex justify-content-between align-items-center">
+                        <h4>Cappuccino</h4>
+                        <i class="fas fa-coffee text-warning"></i>
+                    </div>
+                    <div class="penutupkopi"></div>
+                        <div class="bubuk-level" >
+                        <div class="bubuk-level2" id="bubuk2"></div>
+                        <div class="percentage" id="bubuk2Percentage">100%</div>
+                        </div>
+                    </div>
+                    <div class="bubuk-container">
+                         <div class="d-flex justify-content-between align-items-center">
+                        <h4>Latte</h4>
+                        <i class="fas fa-coffee text-warning"></i>
+                    </div>
+                    <div class="penutupkopi"></div>
+                        <div class="bubuk-level" >
+                        <div class="bubuk-level2" id="bubuk3"></div>
+                        <div class="percentage" id="bubuk3Percentage">100%</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="stat-box position-relative">
-                <form class="formGelas">
-                    <button type="button">
-                        <i class="fa-solid fa-arrows-rotate" style="color:#2caa84;"></i>
-                    </button>
-                </form>
-                <h4>Gelas Tersedia</h4>
-                <div class="stat-value">120</div>
+            <div class="bottom-section">
+                <div class="temperature-container">
+                    <div class="temperature-circle">
+                        <h3>Suhu Air <i class="fas fa-thermometer-half text-danger ms-2"></i></h3>
+                        <div class="temp-text" id="temperature">120°C</div>
+                    </div>
+                </div>
+                <div class="stats-container">
+                    <div class="stat-box">
+                        <form id="formKirim" action="" method="POST" class="formGelas">
+                            <button type="button" onclick="konfirmasiKirim()"><i class="fa-solid fa-arrows-rotate"style="color: #2caa84;"></i></button>
+                            <input type="hidden" name="kirim50" value="1">
+                        </form>
+                        <h4> <i class="fas fa-mug-hot text-success mx-2"></i>Gelas Tersedia</h4>
+                        <div class="stat-value" id="availableGlasses">50 </div>
+                    </div>
+                   <!--  <div class="stat-box">
+                        <h4> <i class="fas fa-money-bill-wave text-success mx-2"></i>Total Pendapatan</h4>
+                        <div class="stat-value" id="totalRevenue">Rp 450.000</div>
+                    </div> -->
+                    <div class="stat-box">
+                        <h4><i class="fas fa-chart-line text-info mx-2"></i>Penjualan Hari ini</h4>
+                        <div class="stat-value" id="totalSales">50 kopi</div>
+                    </div>
+                </div>
             </div>
-
         </div>
-
     </div>
-</div>
-
+           
 </body>
 </html>
